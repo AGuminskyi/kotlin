@@ -182,7 +182,7 @@ class FirRenderer(builder: StringBuilder, private val mode: RenderMode = RenderM
         }
     }
 
-    private fun List<FirTypeParameter>.renderTypeParameters() {
+    private fun List<FirTypeParameterRef>.renderTypeParameters() {
         if (isNotEmpty()) {
             print("<")
             renderSeparated()
@@ -196,6 +196,11 @@ class FirRenderer(builder: StringBuilder, private val mode: RenderMode = RenderM
             renderSeparated()
             print(">")
         }
+    }
+
+    override fun visitTypeParameterRef(typeParameterRef: FirTypeParameterRef) {
+        print("^")
+        typeParameterRef.symbol.fir.accept(this)
     }
 
     override fun visitMemberDeclaration(memberDeclaration: FirMemberDeclaration) {

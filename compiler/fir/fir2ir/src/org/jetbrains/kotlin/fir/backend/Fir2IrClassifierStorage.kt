@@ -100,8 +100,9 @@ class Fir2IrClassifierStorage(
         symbolTable.leaveScope(descriptor)
     }
 
-    internal fun preCacheTypeParameters(owner: FirTypeParametersOwner) {
-        owner.typeParameters.mapIndexed { index, typeParameter ->
+    internal fun preCacheTypeParameters(owner: FirTypeParameterRefsOwner) {
+        for ((index, typeParameter) in owner.typeParameters.withIndex()) {
+            if (typeParameter !is FirTypeParameter) continue
             getCachedIrTypeParameter(typeParameter, index)
                 ?: createIrTypeParameterWithoutBounds(typeParameter, index)
             if (owner is FirProperty && owner.isVar) {
@@ -113,10 +114,11 @@ class Fir2IrClassifierStorage(
     }
 
     internal fun IrTypeParametersContainer.setTypeParameters(
-        owner: FirTypeParametersOwner,
+        owner: FirTypeParameterRefsOwner,
         typeContext: ConversionTypeContext = ConversionTypeContext.DEFAULT
     ) {
-        typeParameters = owner.typeParameters.mapIndexed { index, typeParameter ->
+        typeParameters = owner.typeParameters.mapIndexedNotNull { index, typeParameter ->
+            if (typeParameter !is FirTypeParameter) return@mapIndexedNotNull null
             getIrTypeParameter(typeParameter, index, typeContext).apply {
                 parent = this@setTypeParameters
                 if (superTypes.isEmpty()) {
