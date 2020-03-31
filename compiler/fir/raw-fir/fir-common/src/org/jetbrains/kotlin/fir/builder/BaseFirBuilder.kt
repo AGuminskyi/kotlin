@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.fir.builder
 
 import com.intellij.psi.tree.IElementType
+import kotlinx.collections.immutable.mutate
 import org.jetbrains.kotlin.KtNodeTypes.*
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
@@ -65,6 +66,19 @@ abstract class BaseFirBuilder<T>(val baseSession: FirSession, val context: Conte
             l()
         } finally {
             context.className = context.className.parent()
+        }
+    }
+
+    inline fun <T> withCapturedTypeParameters(block: () -> T): T {
+        val previous = context.capturedTypeParameters
+        val result = block()
+        context.capturedTypeParameters = previous
+        return result
+    }
+
+    fun addCapturedTypeParameters(typeParameters: List<FirTypeParameter>) {
+        context.capturedTypeParameters = context.capturedTypeParameters.mutate {
+            typeParameters.mapTo(it) { typeParameter -> typeParameter.symbol }
         }
     }
 
@@ -146,15 +160,32 @@ abstract class BaseFirBuilder<T>(val baseSession: FirSession, val context: Conte
     fun T?.toDelegatedSelfType(firObject: FirAnonymousObjectBuilder): FirResolvedTypeRef {
         return buildResolvedTypeRef {
             source = this@toDelegatedSelfType?.toFirSourceElement()
-            type = ConeClassLikeTypeImpl(firObject.symbol.toLookupTag(), emptyArray(), false)
+            type = ConeClassLikeTypeImpl(
+                firObject.symbol.toLookupTag(),
+                firObject.typeParameters.map { ConeTypeParameterTypeImpl(it.symbol.toLookupTag(), false) }.toTypedArray(),
+                false
+            )
         }
     }
 
-    fun typeParametersFromSelfType(delegatedSelfTypeRef: FirTypeRef): List<FirTypeParameter> {
+    fun typeParametersFromSelfType(
+        delegatedSelfTypeRef: FirTypeRef
+    ): List<FirTypeParameterRef> {
         return delegatedSelfTypeRef.coneTypeSafe<ConeKotlinType>()
             ?.typeArguments
-            ?.map { ((it as ConeTypeParameterType).lookupTag.symbol as FirTypeParameterSymbol).fir }
+            ?.map {
+                buildConstructedClassTypeParameterRef {
+                    symbol = ((it as ConeTypeParameterType).lookupTag.symbol as FirTypeParameterSymbol)
+                }
+            }
             ?: emptyList()
+    }
+
+    fun constructorTypeParametersFromConstructedClass(ownerTypeParameters: List<FirTypeParameterRef>): List<FirTypeParameterRef> {
+        return ownerTypeParameters.mapNotNull {
+            val declaredTypeParameter = (it as? FirTypeParameter) ?: return@mapNotNull null
+            buildConstructedClassTypeParameterRef { symbol = declaredTypeParameter.symbol }
+        }
     }
 
     fun FirLoopBuilder.configure(generateBlock: () -> FirBlock): FirLoop {

@@ -72,7 +72,7 @@ private class FirStatusResolveTransformer(override val session: FirSession) :
     override fun transformRegularClass(regularClass: FirRegularClass, data: FirDeclarationStatus?): CompositeTransformResult<FirStatement> {
         regularClass.transformStatus(this, regularClass.resolveStatus(regularClass.status, containingClass, isLocal = false))
         return storeClass(regularClass) {
-            regularClass.typeParameters.forEach { it.transformSingle(this, data) as FirTypeParameter }
+            regularClass.typeParameters.forEach { it.transformSingle(this, data) }
             transformDeclaration(regularClass, data)
         } as CompositeTransformResult<FirStatement>
     }

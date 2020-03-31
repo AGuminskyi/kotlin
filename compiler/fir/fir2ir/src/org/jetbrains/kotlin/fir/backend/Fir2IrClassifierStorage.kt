@@ -102,13 +102,14 @@ class Fir2IrClassifierStorage(
 
     internal fun preCacheTypeParameters(owner: FirTypeParameterRefsOwner) {
         for ((index, typeParameter) in owner.typeParameters.withIndex()) {
-            if (typeParameter !is FirTypeParameter) continue
-            getCachedIrTypeParameter(typeParameter, index)
-                ?: createIrTypeParameterWithoutBounds(typeParameter, index)
+            //if (typeParameter !is FirTypeParameter) continue
+            val original = typeParameter.symbol.fir
+            getCachedIrTypeParameter(original, index)
+                ?: createIrTypeParameterWithoutBounds(original, index)
             if (owner is FirProperty && owner.isVar) {
                 val context = ConversionTypeContext.DEFAULT.inSetter()
-                getCachedIrTypeParameter(typeParameter, index, context)
-                    ?: createIrTypeParameterWithoutBounds(typeParameter, index, context)
+                getCachedIrTypeParameter(original, index, context)
+                    ?: createIrTypeParameterWithoutBounds(original, index, context)
             }
         }
     }

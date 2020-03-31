@@ -103,9 +103,7 @@ fun FirReference.toSymbol(
         is FirResolvedNamedReference -> {
             when (val resolvedSymbol = resolvedSymbol) {
                 is FirCallableSymbol<*> -> {
-                    val originalCallableSymbol =
-                        resolvedSymbol.overriddenSymbol?.takeIf { it.callableId == resolvedSymbol.callableId } ?: resolvedSymbol
-                    originalCallableSymbol.toSymbol(declarationStorage)
+                    resolvedSymbol.deepestMatchingOverriddenSymbol().toSymbol(declarationStorage)
                 }
                 is FirClassifierSymbol<*> -> {
                     resolvedSymbol.toSymbol(session, classifierStorage)
@@ -233,6 +231,11 @@ private fun FirTypeRef.collectCallableNamesFromThisAndSupertypes(
 internal tailrec fun FirCallableSymbol<*>.deepestOverriddenSymbol(): FirCallableSymbol<*> {
     val overriddenSymbol = overriddenSymbol ?: return this
     return overriddenSymbol.deepestOverriddenSymbol()
+}
+
+internal tailrec fun FirCallableSymbol<*>.deepestMatchingOverriddenSymbol(root: FirCallableSymbol<*> = this): FirCallableSymbol<*> {
+    val overriddenSymbol = overriddenSymbol?.takeIf { it.callableId == root.callableId } ?: return this
+    return overriddenSymbol.deepestMatchingOverriddenSymbol(this)
 }
 
 private val nameToOperationConventionOrigin = mutableMapOf(

@@ -199,7 +199,7 @@ class FirRenderer(builder: StringBuilder, private val mode: RenderMode = RenderM
     }
 
     override fun visitTypeParameterRef(typeParameterRef: FirTypeParameterRef) {
-        print("^")
+//        print("^")
         typeParameterRef.symbol.fir.accept(this)
     }
 
