@@ -76,10 +76,9 @@ abstract class BaseFirBuilder<T>(val baseSession: FirSession, val context: Conte
         return result
     }
 
-    fun addCapturedTypeParameters(typeParameters: List<FirTypeParameter>) {
-        context.capturedTypeParameters = context.capturedTypeParameters.mutate {
-            typeParameters.mapTo(it) { typeParameter -> typeParameter.symbol }
-        }
+    fun addCapturedTypeParameters(typeParameters: List<FirTypeParameterRef>) {
+        context.capturedTypeParameters =
+            context.capturedTypeParameters.addAll(0, typeParameters.map { typeParameter -> typeParameter.symbol })
     }
 
     fun callableIdForName(name: Name, local: Boolean = false) =

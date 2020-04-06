@@ -656,14 +656,10 @@ class RawFirBuilder(
                         symbol = FirRegularClassSymbol(context.currentClassId)
 
                         classOrObject.extractAnnotationsTo(this)
-                        typeParameters += context.capturedTypeParameters.map { buildOuterClassTypeParameterRef { symbol = it } }
                         classOrObject.extractTypeParametersTo(this)
+                        typeParameters += context.capturedTypeParameters.map { buildOuterClassTypeParameterRef { symbol = it } }
 
-                        context.capturedTypeParameters = context.capturedTypeParameters.mutate {
-                            for (index in context.capturedTypeParameters.size until typeParameters.size) {
-                                it.add(typeParameters[index].symbol)
-                            }
-                        }
+                        addCapturedTypeParameters(typeParameters.take(classOrObject.typeParameters.size))
 
                         val delegatedSelfType = classOrObject.toDelegatedSelfType(this)
                         val delegatedSuperType =
@@ -687,7 +683,7 @@ class RawFirBuilder(
                                     delegatedSuperType,
                                     delegatedSelfType,
                                     classOrObject,
-                                   classBuilder, hasPrimaryConstructor = primaryConstructor != null,
+                                    classBuilder, hasPrimaryConstructor = primaryConstructor != null,
                                     typeParameters
                                 ),
                             )
@@ -992,9 +988,7 @@ class RawFirBuilder(
                 name = propertyName
                 this.isVar = isVar
 
-                if (property.hasInitializer()) {
-                    initializer = { property.initializer }.toFirExpression("Should have initializer")
-                }
+                initializer = propertyInitializer
 
                 if (this@toFirProperty.isLocal) {
                     isLocal = true
