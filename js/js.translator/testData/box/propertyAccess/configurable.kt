@@ -8,6 +8,7 @@ external interface EP {
     val propWithGetter: Boolean
 }
 
+@JsExport
 class P : EP {
     override val simpleProp = 13
     override val anotherProp = "42"
