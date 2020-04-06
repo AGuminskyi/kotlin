@@ -10,7 +10,6 @@ plugins {
 
 dependencies {
     compile(project(":compiler:fir:raw-fir:fir-common"))
-    compile("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.2")
 
     compileOnly(intellijCoreDep()) { includeJars("intellij-core", "guava", rootProject = rootProject) }
 
