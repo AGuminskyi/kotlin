@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.fir.resolve.calls
 
 import org.jetbrains.kotlin.fir.declarations.FirTypeParameterRefsOwner
 import org.jetbrains.kotlin.fir.declarations.FirTypeParameter
+import org.jetbrains.kotlin.fir.declarations.FirTypeParameterRef
 import org.jetbrains.kotlin.fir.declarations.FirTypeParametersOwner
 import org.jetbrains.kotlin.fir.renderWithType
 import org.jetbrains.kotlin.fir.resolve.inference.TypeParameterBasedTypeVariable
@@ -87,7 +88,7 @@ internal object CreateFreshTypeVariableSubstitutorStage : ResolutionStage() {
 
     private fun getTypePreservingFlexibilityWrtTypeVariable(
         type: ConeKotlinType,
-        typeParameter: FirTypeParameter,
+        typeParameter: FirTypeParameterRef,
         context: ConeTypeContext
     ): ConeKotlinType {
         return if (typeParameter.shouldBeFlexible(context)) {
@@ -98,8 +99,8 @@ internal object CreateFreshTypeVariableSubstitutorStage : ResolutionStage() {
         }
     }
 
-    private fun FirTypeParameter.shouldBeFlexible(context: ConeTypeContext): Boolean {
-        return bounds.any {
+    private fun FirTypeParameterRef.shouldBeFlexible(context: ConeTypeContext): Boolean {
+        return symbol.fir.bounds.any {
             val type = it.coneTypeUnsafe<ConeKotlinType>()
             type is ConeFlexibleType || with(context) {
                 (type.typeConstructor() as? FirTypeParameterSymbol)?.fir?.shouldBeFlexible(context) ?: false
