@@ -108,3 +108,11 @@ public actual open class UninitializedPropertyAccessException actual constructor
     actual constructor(message: String?) : this(message, null)
     actual constructor(cause: Throwable?) : this(undefined, cause)
 }
+
+@SinceKotlin("1.4")
+internal actual class KotlinNothingValueException : RuntimeException {
+    actual constructor()
+    actual constructor(message: String?) : super(message)
+    actual constructor(message: String?, cause: Throwable?) : super(message, cause)
+    actual constructor(cause: Throwable?) : super(cause)
+}

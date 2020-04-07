@@ -108,3 +108,11 @@ public expect class UninitializedPropertyAccessException : RuntimeException {
     constructor(message: String?, cause: Throwable?)
     constructor(cause: Throwable?)
 }
+
+@SinceKotlin("1.4")
+internal expect class KotlinNothingValueException : RuntimeException {
+    constructor()
+    constructor(message: String?)
+    constructor(message: String?, cause: Throwable?)
+    constructor(cause: Throwable?)
+}
