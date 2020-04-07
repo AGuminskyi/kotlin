@@ -34,7 +34,7 @@ dependencies {
 
     testImplementation(intellijCoreDep()) { includeJars("intellij-core") }
 
-    testRuntimeOnly(intellijDep()) { includeJars("jps-model") }
+    testRuntimeOnly(intellijDep())
 }
 
 sourceSets {
