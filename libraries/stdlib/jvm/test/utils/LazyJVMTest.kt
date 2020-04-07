@@ -91,7 +91,7 @@ class LazyJVMTest {
     @Test fun publishOnceLazy() {
         val counter = AtomicInteger(0)
         val initialized = AtomicBoolean(false)
-        val threads = 3
+        val threads = minOf(3, Runtime.getRuntime().availableProcessors())
         val values = Random().let { r -> List(threads) { 50 + r.nextInt(50) } }
 
         data class Run(val value: Int, val initialized: Boolean)
